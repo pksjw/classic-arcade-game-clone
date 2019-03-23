@@ -66,10 +66,10 @@ Player.prototype.handleInput = function(moveTo) {
 // Place the player object in a variable called player
 
 const player = new Player(202, 404, 'images/char-boy.png');
-const enemyRow = [65, 145, 230];
+const enemyRow = [64, 147, 230];
 let allEnemies = [];
 for (let i = 0; i < 3; i++) {
-    allEnemies[i] = new Enemy(Math.floor(-100 * ((Math.random()*6)+1)), enemyRow[i]);
+    allEnemies[i] = new Enemy(Math.floor(-100 * ((Math.random()*5)+1)), enemyRow[i]);
 }
  
 // This listens for key presses and sends the keys to your

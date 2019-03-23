@@ -79,7 +79,8 @@ var Engine = (function(global) {
      */
     function update(dt) {
         updateEntities(dt);
-        // checkCollisions();
+        checkCollisions();
+
     }
 
     /* This is called by the update function and loops through all of the
@@ -95,6 +96,22 @@ var Engine = (function(global) {
         });
         player.update();
     }
+
+    /* This is called by the update function after the updateEntities function.
+    *  It checks to see if a collision has happened between the player entity 
+    *  and any of the enemy entities. If soo the player is reset to the starting
+    *  position.
+    */
+    function checkCollisions() {
+        allEnemies.forEach(function(enemy) {
+            if(enemy.y+8 != player.y) return;  //skip if not same row
+            if(enemy.x >= player.x-78 && enemy.x <= player.x + 75)  {
+                player.x = 202;
+                player.y = 404;
+            }
+        });
+
+    }    
 
     /* This function initially draws the "game level", it will then call
      * the renderEntities function. Remember, this function is called every
