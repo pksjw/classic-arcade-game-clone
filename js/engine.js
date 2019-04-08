@@ -23,10 +23,13 @@ var Engine = (function(global) {
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
         lastTime;
-
     canvas.width = 505;
     canvas.height = 606;
     doc.body.appendChild(canvas);
+
+    let pauseUpdateRender = false; // collided or game won?
+    const youWin = document.getElementById('youWinModal');
+    const youLose = document.getElementById('youLoseModal');
 
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
@@ -44,8 +47,10 @@ var Engine = (function(global) {
         /* Call our update/render functions, pass along the time delta to
          * our update function since it may be used for smooth animation.
          */
-        update(dt);
-        render();
+        if (!pauseUpdateRender) {
+            update(dt);
+            render();
+        }
 
         /* Set our lastTime variable which is used to determine the time delta
          * for the next time this function is called.
@@ -63,8 +68,16 @@ var Engine = (function(global) {
      * game loop.
      */
     function init() {
-        reset();
         lastTime = Date.now();
+        doc.getElementById('againWin').addEventListener('click', event => {
+            closeModal();
+            reset();
+       }, false);
+       
+        doc.getElementById('againLose').addEventListener('click', event => {
+            closeModal();
+            reset();
+         }, false);
         main();
     }
 
@@ -79,8 +92,8 @@ var Engine = (function(global) {
      */
     function update(dt) {
         updateEntities(dt);
-        checkCollisions();
-
+        if (gameWon()) { pauseUpdateRender = true }; // The game is won
+        collisionDetected(); // Determines if the game is lost
     }
 
     /* This is called by the update function and loops through all of the
@@ -97,20 +110,37 @@ var Engine = (function(global) {
         player.update();
     }
 
+    /* This is called by the update function to determine if the game has been 
+     * won and if so to display the modal for game won.
+     */
+    function gameWon() {
+        if (player.y == -11) {
+            youWin.classList.add('modal-display', 'fly-in');
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function closeModal() {
+        youWin.classList.remove('modal-display');
+        youLose.classList.remove('modal-display');       
+    }
+
     /* This is called by the update function after the updateEntities function.
     *  It checks to see if a collision has happened between the player entity 
     *  and any of the enemy entities. If soo the player is reset to the starting
     *  position.
     */
-    function checkCollisions() {
+    function collisionDetected() {
         allEnemies.forEach(function(enemy) {
             if(enemy.y+8 != player.y) return;  //skip if not same row
-            if(enemy.x >= player.x-78 && enemy.x <= player.x + 75)  {
-                player.x = 202;
-                player.y = 404;
+            if(enemy.x >= player.x-81 && enemy.x <= player.x + 45)  {
+                  pauseUpdateRender = true; // a collision has occured
+                  youLose.classList.add('modal-display', 'fly-in');
             }
         });
-
+        if (pauseUpdateRender) return true; else return false;
     }    
 
     /* This function initially draws the "game level", it will then call
@@ -178,7 +208,13 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        // noop
+        player.x = 202;
+        player.y = 404;
+        allEnemies.forEach(function(enemy) {
+            enemy.x = Math.floor(-100 * ((Math.random()*5) +1));
+        });
+
+        pauseUpdateRender = false;
     }
 
     /* Go ahead and load all of the images we know we're going to need to

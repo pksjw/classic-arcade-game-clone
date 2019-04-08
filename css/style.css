@@ -1,3 +1,68 @@
 body {
     text-align: center;
 }
+
+button {
+    background-color: #fafefb;
+    border: 2px solid #0f9d58;
+    border-radius: 0.25em;
+    font-size: 1em;
+    padding: 0.5em;
+    margin: 0 0.5em 0 0.5em;
+}
+
+button:hover {
+    background-color: #0f9d58;
+    color: #fafefb;
+}
+
+/* Modal to display the Winner and Loser message 
+   Thank you www.w3schools.com for modal
+   help */
+
+   .modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left:0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(26,26,26);
+    background-color: rgba(26,26,26,0.4);
+    text-align: center;
+}
+
+.modal-content {
+    background-color: #fafefb;
+    background-color: rgba(250,254,251,0.85);
+    margin: 10% auto;
+    padding: 1em;
+    border: 3px solid #0f9d58;
+    border-radius: 0.5em;
+    width: 50%;
+    font-size: 1.5em;
+    text-shadow: 2px 2px 3px #ccc;
+}
+
+.modal-display {
+    display: block;
+}
+
+/* Thank you css tips and tricks! */
+
+.fly-in {
+    animation: flyin 1.2s ease forwards;
+    opacity: 0;
+    transform: scale(2);
+    filter: blur(4px);
+}
+
+@keyframes flyin {
+    to {
+        filter: blur(0);
+        transform: scale(1);
+        opacity: 1;
+    }
+}
