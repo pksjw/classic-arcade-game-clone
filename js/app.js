@@ -33,10 +33,30 @@ var Player = function(x, y, sprite) {
     this.x = x;
     this.y = y;
     this.sprite = sprite;
+    this.hasMoved = false;
+    this.seconds = 0;
+    this.moveCount = 0;
+    this.gameWonOrLost = false;
+    this.gameTimerIntervalID = 0;
+
+    this.displayTimer = function () {
+        timer.innerText = `${(Math.floor(this.seconds / 60)).toString().padStart(2, "0")}:${(this.seconds % 60).toString().padStart(2, "0")}`;   
+    }
+
+    this.displayMoveCount = function(reset) {
+        reset ? this.moveCount=0 : this.moveCount +=1;
+        moves.innerText =  `${this.moveCount.toString().padStart(2, "0")}`;   
+    }
 };
 
 Player.prototype.update = function(dt) {
-
+    // if Player has moved start the game timer
+    if (this.hasMoved && !this.gameTimerIntervalID) {
+        this.gameTimerIntervalID = window.setInterval(() => {
+            this.seconds += 1;
+            this.displayTimer();
+            }, 1000); 
+    }
 };
 
 // Draw the player on the screen
@@ -46,6 +66,7 @@ Player.prototype.render = function() {
 
 //Handle user input to move the player around the game canvas
 Player.prototype.handleInput = function(moveTo) {
+    if (this.gameWonOrLost) return // the game is over not moves allowed
     switch(moveTo) {
         case 'left':
             this.x - 101 < 0 ? this.x = 0 : this.x -= 101;
@@ -59,8 +80,10 @@ Player.prototype.handleInput = function(moveTo) {
         case 'down':
             this.y + 83 > 404 ? this.y = 404 : this.y += 83;
     }
+    if(!this.hasMoved) this.hasMoved = true; // Has Player made it's first move?
+    this.displayMoveCount();
 };
-
+ 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player

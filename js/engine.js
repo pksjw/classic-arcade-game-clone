@@ -12,7 +12,6 @@
  * This engine makes the canvas' context (ctx) object globally available to make 
  * writing app.js a little simpler to work with.
  */
-
 var Engine = (function(global) {
     /* Predefine the variables we'll be using within this scope,
      * create the canvas element, grab the 2D context for that canvas
@@ -27,9 +26,12 @@ var Engine = (function(global) {
     canvas.height = 606;
     doc.body.appendChild(canvas);
 
-    let pauseUpdateRender = false; // collided or game won?
+    // let gameTimerIntervalID = 0;
+
     const youWin = document.getElementById('youWinModal');
     const youLose = document.getElementById('youLoseModal');
+    const timer = document.getElementById('timer');
+    const moves = document.getElementById('moves');
 
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
@@ -47,7 +49,7 @@ var Engine = (function(global) {
         /* Call our update/render functions, pass along the time delta to
          * our update function since it may be used for smooth animation.
          */
-        if (!pauseUpdateRender) {
+        if (!player.gameWonOrLost) {
             update(dt);
             render();
         }
@@ -92,8 +94,9 @@ var Engine = (function(global) {
      */
     function update(dt) {
         updateEntities(dt);
-        if (gameWon()) { pauseUpdateRender = true }; // The game is won
+        if (gameWon()) { player.gameWonOrLost = true }; // The game is won
         collisionDetected(); // Determines if the game is lost
+        //stop timer here????
     }
 
     /* This is called by the update function and loops through all of the
@@ -115,6 +118,7 @@ var Engine = (function(global) {
      */
     function gameWon() {
         if (player.y == -11) {
+            window.clearInterval(player.gameTimerIntervalID);
             youWin.classList.add('modal-display', 'fly-in');
             return true;
         } else {
@@ -136,13 +140,14 @@ var Engine = (function(global) {
         allEnemies.forEach(function(enemy) {
             if(enemy.y+8 != player.y) return;  //skip if not same row
             if(enemy.x >= player.x-81 && enemy.x <= player.x + 45)  {
-                  pauseUpdateRender = true; // a collision has occured
+                  player.gameWonOrLost = true; // a collision has occured
+                  window.clearInterval(player.gameTimerIntervalID);
                   youLose.classList.add('modal-display', 'fly-in');
             }
         });
-        if (pauseUpdateRender) return true; else return false;
-    }    
-
+        if (player.gameWonOrLost) return true; else return false;
+    }  
+    
     /* This function initially draws the "game level", it will then call
      * the renderEntities function. Remember, this function is called every
      * game tick (or loop of the game engine) because that's how games work -
@@ -210,11 +215,16 @@ var Engine = (function(global) {
     function reset() {
         player.x = 202;
         player.y = 404;
+        player.gameTimerIntervalID = 0;
+        player.hasMoved = false;
+        player.seconds = 0;
+        player.displayMoveCount(true);
+        player.displayTimer();
+        player.gameWonOrLost = false;
+
         allEnemies.forEach(function(enemy) {
             enemy.x = Math.floor(-100 * ((Math.random()*5) +1));
         });
-
-        pauseUpdateRender = false;
     }
 
     /* Go ahead and load all of the images we know we're going to need to
