@@ -33,6 +33,89 @@ var Engine = (function(global) {
     const timer = document.getElementById('timer');
     const moves = document.getElementById('moves');
 
+    // Never done db in current langages so here goes...let's go all-in and use indexedDB 
+    if (!window.indexedDB) {
+        window.alert(`A current browser version is required for leaderboard functionality`);
+    } else {
+        window.alert(`You have a current browser`);
+        let db;
+        const openRequest = indexedDB.open("LeaderBoard" , 1);
+
+            openRequest.onupgradeneeded = function(e) {
+                console.log(`I am here in onupgradeneeded ${e.target.error}`);
+                db = e.target.result;
+ 
+                var objectStore = db.createObjectStore("leaders", {keyPath: "leader"});
+                    objectStore.createIndex("leaders", "leader", {unique: true});
+                    objectStore.createIndex("wins", "wins", {unique: false});
+
+                var objectStore2 = db.createObjectStore("players", {keyPath: "player"});
+                    objectStore2.createIndex("players", "player", {unique: true});
+    
+                    objectStore2.transaction.oncomplete = function(e) {
+                        // Initialize the Leaders store with 10 positions
+                        const leadersData = [
+                            {leader: 1, player: "", wins: 0, bestTime: 0, level: 0, lastWin: 0, winStreak: 0},
+                            {leader: 2, player: "", wins: 0, bestTime: 0, level: 0, lastWin: 0, winStreak: 0},
+                            {leader: 3, player: "", wins: 0, bestTime: 0, level: 0, lastWin: 0, winStreak: 0},
+                            {leader: 4, player: "", wins: 0, bestTime: 0, level: 0, lastWin: 0, winStreak: 0},
+                            {leader: 5, player: "", wins: 0, bestTime: 0, level: 0, lastWin: 0, winStreak: 0},
+                            {leader: 6, player: "", wins: 0, bestTime: 0, level: 0, lastWin: 0, winStreak: 0},
+                            {leader: 7, player: "", wins: 0, bestTime: 0, level: 0, lastWin: 0, winStreak: 0},
+                            {leader: 8, player: "", wins: 0, bestTime: 0, level: 0, lastWin: 0, winStreak: 0},
+                            {leader: 9, player: "", wins: 0, bestTime: 0, level: 0, lastWin: 0, winStreak: 0},
+                            {leader: 10, player: "", wins: 0, bestTime: 0, level: 0, lastWin: 0, winStreak: 0}
+                        ];
+
+                        var leadersObjectStore = db.transaction("leaders", "readwrite").objectStore("leaders");
+                        console.log(`I am here before the forEach`);
+                        leadersData.forEach(function(leaders) {
+                            console.log(leaders);
+                            leadersObjectStore.add(leaders);
+                        });
+
+                        // Initialize the Players Store with one Guest user
+                        const playersData = {player: "Guest", leader: 0, wins: 0, bestTime: 0, level: 0, lastWin: 0, winStreak: 999};
+
+                        var playersObjectStore = db.transaction("players", "readwrite").objectStore("players");
+                            playersObjectStore.add(playersData);
+                    };
+                
+            }; 
+
+            openRequest.onsuccess = function(e) {
+                db = e.target.result;
+                console.log("Here in onsuccess");
+                // Now we want to display the leaderboard, let's pretend we did it for now
+                // Now we want get the name, we can also ask if you want to play the game
+                // maybe they just want to look at the leaderboard.
+                // displayLeaderboard(); TODO:
+                // getPlayerName(); TODO:
+                // tell them they suck hahaha
+                // player: data player (ties to leaders store...same name)
+                // leader: if they are on the leaderboard (ties to leader keypath and index leaders)
+                // wins: number of wins
+                // bestTime: the fastest win time
+                // level: players game level (based on wins)
+                // lastWin: date/time of last win (got to the water)
+                // winStreak: longest win streak without a loss...count
+                // TODO:
+                // So let's assume we have the player name now...Paul
+                // we need to see if that player name exists in the players store
+                // if it does we need to ask, "Is this you", if no then "player picks a new unique player name"
+                // if yes then that is them and go on (let's for now assume if it's there its them)
+
+            };
+
+            openRequest.onerror = function(e) {
+                alert(`Error loading database LeaderBoard ${e.target.error}`);
+            };
+            openRequest.onblocked = function(e) {
+                alert(`You stinky browser, why am I blocked? Because ${e.target.error}`);
+            };
+
+    }
+
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
      */
@@ -95,8 +178,7 @@ var Engine = (function(global) {
     function update(dt) {
         updateEntities(dt);
         if (gameWon()) { player.gameWonOrLost = true }; // The game is won
-        collisionDetected(); // Determines if the game is lost
-        //stop timer here????
+        if (collisionDetected()) {player.gameWonOrLost = true}; // The game is lost
     }
 
     /* This is called by the update function and loops through all of the

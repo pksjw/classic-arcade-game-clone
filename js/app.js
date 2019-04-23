@@ -38,6 +38,10 @@ var Player = function(x, y, sprite) {
     this.moveCount = 0;
     this.gameWonOrLost = false;
     this.gameTimerIntervalID = 0;
+    this.lastWin = "";
+    this.name = "";
+    this.level = "";
+    this.bestTime = 0;
 
     this.displayTimer = function () {
         timer.innerText = `${(Math.floor(this.seconds / 60)).toString().padStart(2, "0")}:${(this.seconds % 60).toString().padStart(2, "0")}`;   
@@ -83,6 +87,8 @@ Player.prototype.handleInput = function(moveTo) {
     if(!this.hasMoved) this.hasMoved = true; // Has Player made it's first move?
     this.displayMoveCount();
 };
+
+
  
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
